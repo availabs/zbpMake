@@ -1,0 +1,22 @@
+{
+  "name": "zpbMake",
+  "version": "1.0.0",
+  "description": "Setup: ```shell   cd dataProcessing   make ```",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cakesofwrath/zbpMake"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/cakesofwrath/zbpMake/issues"
+  },
+  "homepage": "https://github.com/cakesofwrath/zbpMake",
+  "dependencies": {
+    "d3": "^3.5.5"
+  }
+}
