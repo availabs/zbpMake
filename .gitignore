@@ -1,4 +1,3 @@
-dataProcessing/zips/*
-zips/*
-raw/*
-*.zips
+zips
+raw
+*.zip
