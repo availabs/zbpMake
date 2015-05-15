@@ -1,4 +1,4 @@
-import csv, sys, getopt, os.path
+import csv, sys, getopt, os.path, json
 
 def yrRange(start, finish):
 	return [str(yr) for yr in range(start, finish+1)]
@@ -38,7 +38,7 @@ def getNextKeyYear(yr):
 
 def convert(fileYear, yearTo="2012"):
 	year, yearGoal = key[fileYear], key[yearTo]
-	with open("zbp%sdetail.txt" % str(fileYear)[2:], "r") as dat:
+	with open("raw/zbp%sdetail.txt" % str(fileYear)[2:], "r") as dat:
 		dataKeys = dat.readline().replace("\"", "").replace("\n", "").replace("\r", "").split(',')
 		dat.seek(0)
 		data = list(csv.DictReader(dat))
@@ -56,7 +56,7 @@ def convert(fileYear, yearTo="2012"):
 				concord = {k: thisConc[k] if k in thisConc else notIn(k, year, yearGoal) for k in concord.keys()}
 		year = getNextKeyYear(year)
 	with open("zbp%sdetail_conv.txt" % yearTo[2:], "w+") as nF:
-		pass #write the data dict, with each naics replaced.
+		
 
 def main():
 	pass
