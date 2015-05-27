@@ -1,4 +1,5 @@
 import csv, sys, getopt, os.path, json
+import pandas as pd
 
 def yrRange(start, finish):
 	return [str(yr) for yr in range(start, finish+1)]
@@ -6,8 +7,8 @@ def yrRange(start, finish):
 convs = {
 	"1987": "2002",
 	"1997": "2002",
-	"2002", "2007",
-	"2007", "2012"
+	"2002": "2007",
+	"2007": "2012"
 }
 
 tabuls = {
@@ -18,13 +19,21 @@ tabuls = {
 	"1987": yrRange(1988, 1997)
 }
 
-key = {yr: keyYear for yr in keyYear for keyYear in tabuls}
+#key = {yr: keyYear for yr in keyYear for keyYear in tabuls}
+key = {}
+for key_yr in tabuls:
+	for yr in key_yr:
+		key[yr] = key_yr
 
-def notIn(s, yr1, yr2):
+def not_in(s, yr1, yr2):
 	print "%s not present from %s to %s" % (s, yr1, yr2)
 	return ""
 
-def getNextKeyYear(yr):
+def not_in_data(dn):
+	print "%s not in concord" % (dn)
+	return dn
+
+def get_next_yr(yr):
 	if yr in tabuls["1987"]:
 		return "1997"
 	elif yr in tabuls["1997"]:
@@ -34,35 +43,28 @@ def getNextKeyYear(yr):
 	elif yr in tabuls["2007"]:
 		return "2012"
 	else:
-		raise ValueError("getNextKeyYear passed incorrect year of %s" % str(yr))
+		raise ValueError("get_next_year passed incorrect year of %s" % str(yr))
 
-def convert(fileYear, yearTo="2012"):
-	year, yearGoal = key[fileYear], key[yearTo]
-	with open("raw/zbp%sdetail.txt" % str(fileYear)[2:], "r") as dat:
-		dataKeys = dat.readline().replace("\"", "").replace("\n", "").replace("\r", "").split(',')
-		dat.seek(0)
-		data = list(csv.DictReader(dat))
-	first = True 
+# somewhat inefficient, but works
+def convert(file_year, year_to="2012"):
+	year, year_goal = key[file_year], key[year_to] # the classification year that each year falls under
+	data = pd.read_csv("raw/zbp%sdetail.txt" % str(file_year)[2:]) 
+	first = True # b/c first time concord is different
 	while year != yearGoal:
-		with open("%s_%s.csv" % (year, convs[year]), 'r') as f:
-			#The cols are always oldName, oldDesc, newName, newDesc
-			keys = f.readline().split(',')[:4]
-			f.seek(0)
-			if first:
-				concord = {l[keys[0]]: l[keys[2]] for l in list(csv.DictReader(f))} #only change the val, not key
-				first = False
-			else:
-				thisConc = {l[keys[0]]: l[keys[2]] for l in list(csv.DictReader(f))}
-				concord = {k: thisConc[k] if k in thisConc else notIn(k, year, yearGoal) for k in concord.keys()}
-		year = getNextKeyYear(year)
-	with open("zbp%sdetail_conv.txt" % yearTo[2:], "w+") as nF:
-		
-
-def main():
-	pass
+		concord_raw = pd.read_csv("%s_%s.csv" % (year, convs[year]), "r")
+		keys = list(concord.columns.values) # get column keys
+		if first:
+			concord = {l[keys[0]]: l[keys[2]] for l in concord_raw.values}
+			first = False
+		else:
+			this_conc = {l[keys[0]]: l[keys[2]] for l in concord.values}
+			concord = {k: this_conc[k] if k in this_conc else not_in(k, year, yearGoal) for k in concord} # converts over
+		year = get_next_yr(year)
+	data["naics"] = pd.Series([concord[l] if l in concord else not_in_data(l) for l in data["naics"]])
+	pd.to_csv("converted/zbp%sdetail_conv.txt" % str(file_year)[2:])
 
 if __name__ == "__main__":
-	if len(sys,argv) != 5 or len(sys.argv) != 3:
+	if len(sys.argv) != 5 or len(sys.argv) != 3:
 		print "Usage: python zbpConverter.py <two-digit year> [-y] [yearToConvertTo]"
 		sys.exit()
 	elif not sys.argv[2].isnumeric() or (int(sys.argv[2]) < 0 or (int(sys,argv[2]) > 13 and not int(sys.argv[2]) < 94) or int(sys.argv[2]) > 100):
@@ -70,7 +72,7 @@ if __name__ == "__main__":
 		sys.exit()
 	year = int(sys.argv[2])
 	if len(sys.argv) == 5 and sys.argv[3] == '-y':
-		if not sys.argv[4].isnumeric() or (int(sys.argv[3]) < 0 or (int(sys,argv[3]) > 13 and not int(sys.argv[3]) < 94) or int(sys.argv[3]) > 100)
+		if not sys.argv[4].isnumeric() or (int(sys.argv[3]) < 0 or (int(sys,argv[3]) > 13 and not int(sys.argv[3]) < 94) or int(sys.argv[3]) > 100):
 			print "Invalid year to convert to"
 			sys.exit()
 		convert(year, yearTo=int(sys.argv[4]))
