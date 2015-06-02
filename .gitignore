@@ -1,5 +1,6 @@
 zips
 raw
-*.zip
+zips
+converted
 
 node_modules/
