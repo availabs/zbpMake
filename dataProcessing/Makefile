@@ -25,6 +25,7 @@ GENERATED_FILES = \
 SHELL = /bin/bash
 
 all: $(GENERATED_FILES)
+	mkdir -p converted
 
 .PHONY: all clean
 
@@ -41,7 +42,7 @@ zips/%.zip:
 	fi 
 
 raw/%.txt: zips/%.zip
-	unzip $<
+	unzip -L $<
 	touch $(notdir $(basename $<)).txt
 	mkdir -p $(dir $@)
 	mv $(notdir $(basename $<)).txt $(dir $@)
